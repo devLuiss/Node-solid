@@ -4,6 +4,11 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+// relacionamentos:
+// 1:1 => um para um (one to one)
+// 1:N => um para muitos (one to many) ex: um usuário tem muitos check-ins
+// N:M => muitos para muitos (many to many) ex: um usuário pode ter muitos check-ins e um check-in pode ter muitos usuários
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,10 +19,39 @@ datasource db {
 }
 
 model User {
-  id    String @id @default(uuid())
-  name  String
-  email String @unique
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  password_hash String
+  created_at    DateTime @default(now())
+
+  checkIns CheckIn[]
 
   // use @@map to map the table to a different name in the database , ex : @@map("users") will map the table to users in the database but the model will still be User
   @@map("users")
+}
+
+model CheckIn {
+  id           String    @id @default(uuid())
+  created_at   DateTime  @default(now())
+  validated_at DateTime?
+
+  user    User    @relation(fields: [user_Id], references: [id])
+  user_Id String
+  gym     Gym?    @relation(fields: [gym_Id], references: [id])
+  gym_Id  String?
+
+  @@map("check_ins") // map the table to check_ins in the database but the model will still be CheckIn
+}
+
+model Gym {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  phone       String?
+  latitude    Decimal
+  longitude   Decimal
+  checkIns    CheckIn[]
+
+  @@map("gyms") // map the table to gyms in the database but the model will still be Gym 
 }

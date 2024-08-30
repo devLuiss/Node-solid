@@ -31,3 +31,7 @@ GymPass style app.
 - [ ] Todas listas de dados precisam estar paginadas com 20 itens por página;
 - [ ] O usuário deve ser identificado por um JWT (JSON Web Token);
       0 comments
+
+## Docker
+
+- docker compose up -d para criar e rodar o docker
