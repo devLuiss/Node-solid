@@ -1,19 +1,32 @@
-import { compare } from "bcryptjs";
-import { InMemoryUsersRepository } from "../repositories/in-memory/in-memory-users-repository";
-// import { PrismaUsersRepository } from "src/repositories/prisma/prisma-users-repository";
+import { InMemoryUsersRepository } from "@/repositories/in-memory/in-memory-users-repository";
 import { UserAlreadyExistError } from "@/use-cases/errors/user-already-exist-error";
-import { describe, expect, it } from "vitest";
+import { compare } from "bcryptjs";
+import { beforeEach, describe, expect, it } from "vitest";
 import { RegisterUse } from "./register";
-describe("register use case", () => {
-  it("should hash the password upon registration", async () => {
-    const usersRepository = new InMemoryUsersRepository();
-    // const prismaUsersRepository = new PrismaUsersRepository();
-    const registerUseCase = new RegisterUse(usersRepository);
+let usersRepository: InMemoryUsersRepository;
+let sut: RegisterUse;
 
-    const { user } = await registerUseCase.execute({
-      email: "jhondoee@gmail.com",
+describe("Register Use Case", () => {
+  beforeEach(() => {
+    usersRepository = new InMemoryUsersRepository();
+    sut = new RegisterUse(usersRepository);
+  });
+
+  it("should to register", async () => {
+    const { user } = await sut.execute({
+      name: "John Doe",
+      email: "johndoe@example.com",
       password: "123456",
-      name: "Jhon Doe",
+    });
+
+    expect(user.id).toEqual(expect.any(String));
+  });
+
+  it("should hash user password upon registration", async () => {
+    const { user } = await sut.execute({
+      name: "John Doe",
+      email: "johndoe@example.com",
+      password: "123456",
     });
 
     const isPasswordCorrectlyHashed = await compare(
@@ -24,22 +37,21 @@ describe("register use case", () => {
     expect(isPasswordCorrectlyHashed).toBe(true);
   });
 
-  it("should not allow two users with the same email", async () => {
-    const registerUseCase = new RegisterUse(new InMemoryUsersRepository());
+  it("should not be able to register with same email twice", async () => {
+    const email = "johndoe@example.com";
 
-    await registerUseCase.execute({
-      email: "test@example.com",
-      password: "password123",
-      name: "Jhon Doe",
+    await sut.execute({
+      name: "John Doe",
+      email,
+      password: "123456",
     });
 
-    // Aqui, retornamos a Promise corretamente para expect(...).rejects funcionar
-    await expect(
-      registerUseCase.execute({
-        email: "test@example.com",
-        password: "password123",
-        name: "Jhon Doe",
+    await expect(() =>
+      sut.execute({
+        name: "John Doe",
+        email,
+        password: "123456",
       })
-    ).rejects.toThrowError(UserAlreadyExistError);
+    ).rejects.toBeInstanceOf(UserAlreadyExistError);
   });
 });
