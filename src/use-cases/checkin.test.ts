@@ -8,20 +8,21 @@ let checkInsRepository: InMemoryCheckInsRepository;
 let gymRepository: InMemoryGymsepository;
 let sut: CheckInUseCase;
 describe("check in use case", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     checkInsRepository = new InMemoryCheckInsRepository();
     gymRepository = new InMemoryGymsepository();
     sut = new CheckInUseCase(checkInsRepository, gymRepository);
-    vi.useFakeTimers();
 
-    gymRepository.items.push({
-      id: "gym-id",
-      title: "Academia jsGym",
-      description: "asd",
-      latitude: new Decimal(0),
-      longitude: new Decimal(0),
+    await gymRepository.create({
+      title: "Academia1",
+      latitude: -27.0747279,
+      longitude: -49.4889672,
       phone: null,
+      description: null,
+      id: "gym-id",
     });
+
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
@@ -34,11 +35,33 @@ describe("check in use case", () => {
     const { checkIn } = await sut.execute({
       userId: "user-id",
       gymId: "gym-id",
-      userLatitude: 0,
-      userLongitude: 0,
+      userLatitude: -27.0747279,
+      userLongitude: -49.4889672,
     });
 
     await expect(checkIn.id).toEqual(expect.any(String));
+  });
+
+  it("should not be able to check in on distant gym", async () => {
+    vi.setSystemTime(new Date(2022, 0, 20, 8, 0, 0));
+
+    await gymRepository.items.push({
+      id: "gym-id2",
+      title: "Academia jsGym",
+      description: "asd",
+      latitude: new Decimal(-27.0747279),
+      longitude: new Decimal(-49.4889672),
+      phone: null,
+    });
+    // Garantindo que a função retorne uma Promise que será rejeitada
+    await expect(
+      sut.execute({
+        userId: "user-id",
+        gymId: "gym-id",
+        userLatitude: -27.2092052,
+        userLongitude: -49.6401091,
+      })
+    ).rejects.toBeInstanceOf(Error); // Aqui você espera que seja uma instância de Error
   });
 
   it("should not be able to check in twice in the same day", async () => {
@@ -47,8 +70,8 @@ describe("check in use case", () => {
     await sut.execute({
       userId: "user-id",
       gymId: "gym-id",
-      userLatitude: 0,
-      userLongitude: 0,
+      userLatitude: -27.0747279,
+      userLongitude: -49.4889672,
     });
 
     await expect(() =>
@@ -68,16 +91,16 @@ describe("check in use case", () => {
       await sut.execute({
         userId: "user-id",
         gymId: "gym-id",
-        userLatitude: 0,
-        userLongitude: 0,
+        userLatitude: -27.0747279,
+        userLongitude: -49.4889672,
       });
       vi.setSystemTime(new Date(2022, 0, 21, 8, 0, 0));
 
       const { checkIn } = await sut.execute({
         userId: "user-id",
         gymId: "gym-id",
-        userLatitude: 0,
-        userLongitude: 0,
+        userLatitude: -27.0747279,
+        userLongitude: -49.4889672,
       });
 
       expect(checkIn.id).toEqual(expect.any(String));

@@ -1,5 +1,6 @@
 import { CheckInsRepository } from "@/repositories/check-ins-repository";
 import { ResourceNotFoundError } from "@/use-cases/errors/resource-note-found-error";
+import { getDistanceBtwCoordinates } from "@/utils/get-distance-btw-coordinates";
 import { CheckIn } from "@prisma/client";
 import { GymsRepository } from "./../repositories/gyms-repository";
 
@@ -34,6 +35,23 @@ export class CheckInUseCase {
 
     // calcule distance between user and gym
     // if distance is greater than 100m, throw error "User is too far from gym"
+
+    const distance = getDistanceBtwCoordinates(
+      {
+        latitude: Number(userLatitude),
+        longitude: Number(userLongitude),
+      },
+      {
+        latitude: Number(gym.latitude),
+        longitude: Number(gym.longitude),
+      }
+    );
+    const gymFromUserMaxDistance = 0.1;
+    console.log(distance);
+
+    if (distance > gymFromUserMaxDistance) {
+      throw new Error();
+    }
 
     const checkInSameDay = await this.CheckInsRepository.findByUserIdOnDate(
       userId,
