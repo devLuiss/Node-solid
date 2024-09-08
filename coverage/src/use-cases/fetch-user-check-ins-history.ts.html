@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/utils/get-distance-btw-coordinates.ts</title>
+    <title>Code coverage report for src/use-cases/fetch-user-check-ins-history.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/utils</a> get-distance-btw-coordinates.ts</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/use-cases</a> fetch-user-check-ins-history.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">90% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>18/20</span>
+                <span class='fraction'>15/15</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>4/5</span>
+                <span class='fraction'>2/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>2/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">90% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>18/20</span>
+                <span class='fraction'>15/15</span>
             </div>
         
             
@@ -93,30 +93,25 @@
 <a name='L28'></a><a href='#L28'>28</a>
 <a name='L29'></a><a href='#L29'>29</a>
 <a name='L30'></a><a href='#L30'>30</a>
-<a name='L31'></a><a href='#L31'>31</a>
-<a name='L32'></a><a href='#L32'>32</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L31'></a><a href='#L31'>31</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
@@ -125,36 +120,38 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">export interface Coordinate {
-  latitude: number;
-  longitude: number;
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { CheckInsRepository } from "@/repositories/check-ins-repository";
+import { CheckIn } from "@prisma/client";
+&nbsp;
+interface FetchUserCheckInHistoryUseCaseRequest {
+  userId: string;
+  page: number;
 }
 &nbsp;
-export function getDistanceBtwCoordinates(from: Coordinate, to: Coordinate) {
-  if (from.latitude === to.latitude &amp;&amp; from.longitude === to.longitude) {
-    return 0;
+interface FetchUserCheckInHistoryUseCaseResponse {
+  checkIn: CheckIn[];
+}
+&nbsp;
+export class FetchUserCheckInHistoryUseCase {
+  constructor(private CheckInsRepository: CheckInsRepository) {}
+&nbsp;
+  async execute({
+    userId,
+    page,
+  }: FetchUserCheckInHistoryUseCaseRequest): Promise&lt;FetchUserCheckInHistoryUseCaseResponse&gt; {
+    // verify if user already checkin in the same day
+    const checkIns = await this.CheckInsRepository.findManyByUserId(
+      userId,
+      page
+    );
+&nbsp;
+    return {
+      checkIn: checkIns,
+    };
   }
-&nbsp;
-  const fromRadian = (Math.PI * from.latitude) / 180;
-  const toRadian = (Math.PI * to.latitude) / 180;
-&nbsp;
-  const theta = from.longitude - to.longitude;
-  const radTheta = (Math.PI * theta) / 180;
-&nbsp;
-  let dist =
-    Math.sin(fromRadian) * Math.sin(toRadian) +
-    Math.cos(fromRadian) * Math.cos(toRadian) * Math.cos(radTheta);
-&nbsp;
-  if (dist &gt; 1) <span class="branch-0 cbranch-no" title="branch not covered" >{</span>
-<span class="cstat-no" title="statement not covered" >    dist = 1;</span>
-<span class="cstat-no" title="statement not covered" >  }</span>
-&nbsp;
-  dist = Math.acos(dist);
-  dist = (dist * 180) / Math.PI;
-  dist = dist * 60 * 1.1515;
-  dist = dist * 1.609344;
-&nbsp;
-  return dist;
 }
 &nbsp;</pre></td></tr></table></pre>
 
